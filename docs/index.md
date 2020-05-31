@@ -6,20 +6,24 @@ This documentation explains how to run [Pgpool-II](https://pgpool.net "Pgpool-II
 
 In a database cluster, replicas can't be created as easily as web servers, because you must consider
 the difference between Primary and Standby. PostgreSQL operators simplify the processes of deploying
-and managing a PostgreSQL cluster on Kubernetes. In this documentation, we use KubeDB to deploy and
+and managing a PostgreSQL cluster on Kubernetes. In this documentation, we use `KubeDB` to deploy and
 manage a PostgreSQL cluster.
 
-And on kubernetes Pgpool-II's health check, automatic failover, Watchdog and online recovery feature aren't requried. You need to only enable load balancing and connection pooling.
+And on kubernetes Pgpool-II's health check, automatic failover, Watchdog and online recovery features aren't required. You need to only enable load balancing and connection pooling.
 
 ## Requirements
 
 Before you start the install and configuration processes, please check the following prerequisites.
-- Make sure you have a Kubernetes cluster, and the kubectl is installed.
+- Make sure you have a Kubernetes cluster, and the `kubectl` is installed.
 - Kebernetes 1.15 or older is required.
+
+## Cluster architecture with KubeDB and Pgpool-II
+
+![architecture](https://user-images.githubusercontent.com/8177517/83357821-c0f05d80-a3a9-11ea-940e-9617c291db47.png)
 
 ## Install KubeDB Operator
 
-We use a seperate namespace to install KubeDB.
+We use a separate namespace to install KubeDB.
 
 ```
 # kubectl create namespace demo
@@ -86,7 +90,7 @@ spec:
 # kubectl apply -f https://raw.githubusercontent.com/pgpool/pgpool2_on_k8s/master/hot-postgres.yaml --namespace=demo
 ```
 
-After applying the YAML file above you can see three pods are created.
+After applying the YAML file above you can see that three pods are created.
 `hot-postgres-0` is Primary server and `hot-postgres-1` and `hot-postgres-2` are Standby servers.
 
 ```
@@ -98,8 +102,7 @@ hot-postgres-2   2/2     Running   0          4m48s   controller-revision-hash=h
 ```
 
 And two `Service` are created.
-`hot-postgres` service is mapped to Primary server and
-`hot-postgres-replicas` service is mapped to Standby servers.
+`hot-postgres` service is mapped to Primary server and `hot-postgres-replicas` service is mapped to Standby servers.
 
 ```
 # kubectl get svc -n demo
@@ -116,7 +119,7 @@ kubedb-operator         ClusterIP   10.110.0.111     <none>        443/TCP     1
 Next, let's deploy Pgpool-II pod that contains a Pgpool-II container and a [Pgpool-II Exporter](https://github.com/pgpool/pgpool2_exporter "Pgpool-II Exporter") container.
 
 Environment variables starting with `PGPOOL_PARAMS_` can be converted to Pgpool-II's configuration parameters
-and these environment variables can override the default configuration.
+and these values can override the default configurations.
 
 For example, here we set Primary and Standby `Service` name to environment variables.
 
@@ -135,6 +138,8 @@ backend_hostname0='hot-postgres'
 backend_hostname1='hot-postgres-replicas'
 ```
 
+Let's deploy Pgpool-II pod.
+
 ```
 # kubectl apply -f https://raw.githubusercontent.com/pgpool/pgpool2_on_k8s/master/pgpool_deploy.yaml --namespace=demo
 ```
@@ -146,6 +151,7 @@ Alternatively, if you want to modify more Pgpool-II parameters, you can configur
 # kubectl apply -f https://raw.githubusercontent.com/pgpool/pgpool2_on_k8s/master/pgpool_deploy_with_mount_configmap.yaml --namespace=demo
 ```
 
+After deploying Pgpool-II, we can see that Pgpool-II pod `pgpool-55cfbcb9cb-8fm6f` is in `running` status.
 ```
 # kubectl get pod -n demo
 NAME                              READY   STATUS    RESTARTS   AGE
@@ -154,7 +160,11 @@ hot-postgres-1                    2/2     Running   0          7m38s
 hot-postgres-2                    2/2     Running   0          6m17s
 kubedb-operator-5565fbdb8-22ks9   1/1     Running   1          13m
 pgpool-55cfbcb9cb-8fm6f           2/2     Running   0          12s
+```
 
+`pgpool` and `pgpool-stats` services are created.
+
+```
 [root@ser1 kube]# kubectl get svc -n demo
 NAME                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)     AGE
 hot-postgres            ClusterIP   10.106.170.103   <none>        5432/TCP    9m9s
@@ -166,7 +176,7 @@ pgpool                  ClusterIP   10.97.99.254     <none>        9999/TCP    1
 pgpool-stats            ClusterIP   10.98.225.77     <none>        9719/TCP    17s
 ```
 
-## Deploy prometheus server
+## Deploy Prometheus server
 
 Configure Prometheus Server using `ConfigMap`.
 
@@ -175,7 +185,7 @@ Configure Prometheus Server using `ConfigMap`.
 # kubectl apply -f https://raw.githubusercontent.com/pgpool/pgpool2_on_k8s/master/prometheus_configmap.yaml --namespace=monitoring
 ```
 
-Deploy prometheus server.
+Deploy Prometheus server.
 
 ```
 # kubectl apply -f https://raw.githubusercontent.com/pgpool/pgpool2_on_k8s/master/prometheus.yaml --namespace=monitoring
