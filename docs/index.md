@@ -136,7 +136,7 @@ kubedb-operator         ClusterIP   10.105.34.15    <none>        443/TCP     20
 Two Standby servers are connected to the Primary server.
 
 ```
-# psql -h 10.106.51.191 -U postgres -c "select * from pg_stat_replication"
+# psql -h 10.106.51.191 -U postgres -c "SELECT * FROM pg_stat_replication"
  pid | usesysid | usename  | application_name | client_addr | client_hostname | client_port |         backend_start  
        | backend_xmin |   state   | sent_lsn  | write_lsn | flush_lsn | replay_lsn | write_lag | flush_lag | replay_l
 ag | sync_priority | sync_state 
