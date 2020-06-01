@@ -131,8 +131,8 @@ kubedb-operator         ClusterIP   10.105.34.15    <none>        443/TCP     20
 
 ### Connect to PostgreSQL using Service
 
-- Connect to Primary's service
-
+#### Connect to Primary's service  
+  
 Two Standby servers are connected to the Primary server.
 
 ```
@@ -151,8 +151,8 @@ ag | sync_priority | sync_state
    |             0 | async
 ```
 
-- Connect to Standby's service
-
+#### Connect to Standby's service  
+  
 Requests are load balanced across the replicas.
 
 ```
@@ -262,7 +262,7 @@ Then, run `SELECT 1` via `pgpool` service several times.
         1
 ```
 
-You can see that `select_cnt` columns increase at each backend.
+You can see that `select_cnt` columns increase at each backend.  
 Pgpool-II can load balance read queries across PostgreSQL servers.
 
 ```
